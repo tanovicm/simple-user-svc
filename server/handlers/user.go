@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"usersvc.io/api/v1/server/models"
 	"usersvc.io/api/v1/server/requests"
+	"usersvc.io/api/v1/server/response"
 	"usersvc.io/api/v1/server/services"
 )
 
@@ -35,7 +36,13 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	user := r.Context().Value("user").(*models.User)
 
-	JSONOk(w, user)
+	JSONOk(w, &response.GetUserResponse{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Nickname:  user.Nickname,
+		Email:     user.Email,
+		Country:   user.Country,
+	})
 }
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +52,19 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	JSONOk(w, users)
+	resp := []*response.GetUserResponse{}
+	for _, user := range users {
+		rsp := &response.GetUserResponse{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Nickname:  user.Nickname,
+			Email:     user.Email,
+			Country:   user.Country,
+		}
+		resp = append(resp, rsp)
+	}
+
+	JSONOk(w, resp)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -57,8 +76,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.CreateUser(request)
-	JSONOk(w, &struct{}{})
+	user, err := services.CreateUser(request)
+	if err != nil {
+		JSONError(w, "Error creating user", http.StatusInternalServerError)
+	}
+	JSONOk(w, &response.CreateUserResponse{ID: user.ID.Hex()})
 
 }
 

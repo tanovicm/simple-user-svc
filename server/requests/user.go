@@ -1,9 +1,8 @@
 package requests
 
 type CreateUserRequest struct {
-	Id        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
 	Nickname  string `json:"nickname"`
 	Password  string `json:"password"`
 	Email     string `json:"email"`
@@ -11,8 +10,8 @@ type CreateUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
 	Nickname  string `json:"nickname"`
 	Password  string `json:"password"`
 	Email     string `json:"email"`
