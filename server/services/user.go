@@ -25,15 +25,21 @@ func CreateUser(req requests.CreateUserRequest) (*models.User, error) {
 	return user, nil
 }
 
-func GetUser(req requests.CreateUserRequest) {
+func GetUser(userID string) (*models.User, error) {
 
-	
-
+	return nil, nil
 }
 
-func DeleteUser(req requests.CreateUserRequest) {
+func DeleteUser(userID string) error {
 
+	return nil
 }
-func ListUsers(req requests.CreateUserRequest) {
+func ListUsers() ([]models.User, error) {
 
+	return nil, nil
+}
+
+func UpdateUser(userID string, req *requests.UpdateUserRequest) error {
+
+	return nil
 }

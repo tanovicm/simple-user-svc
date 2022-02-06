@@ -27,7 +27,7 @@ func BuildRouter() *chi.Mux {
 		r.Post("/", handlers.CreateUser) // POST /users
 
 		r.Route("/{userID}", func(r chi.Router) {
-			// r.Use(UserCtx)                     // Load the *User on the request context
+			r.Use(handlers.UserCtx)            // Load the *User on the request context
 			r.Get("/", handlers.GetUser)       // GET /users/123
 			r.Put("/", handlers.UpdateUser)    // PUT /users/123
 			r.Delete("/", handlers.DeleteUser) // DELETE /users/123
