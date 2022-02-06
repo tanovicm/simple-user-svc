@@ -30,7 +30,6 @@ func TestCreateUser(t *testing.T) {
 			Email:     "mail@mail.com",
 			Country:   "Serbia",
 		}}, want: &models.User{
-
 			FirstName: "Marijana",
 			LastName:  "Tanovic",
 			Nickname:  "Mara",
@@ -61,6 +60,7 @@ func TestCreateUser(t *testing.T) {
 			if !compareStructs(got, tt.want) && !tt.wantErr {
 				t.Errorf("CreateUser() = %v, want %v", got, tt.want)
 			}
+			_ = DeleteUser(got.ID.Hex())
 		})
 	}
 }
@@ -128,8 +128,12 @@ func TestGetUser(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetUser() = %v, want %v", got, tt.want)
 			}
+			if got != nil {
+				_ = DeleteUser(got.ID.Hex())
+			}
 		})
 	}
+
 }
 
 func TestDeleteUser(t *testing.T) {
@@ -223,4 +227,5 @@ func TestUpdateUser(t *testing.T) {
 			}
 		})
 	}
+	_ = DeleteUser(user.ID.Hex())
 }
