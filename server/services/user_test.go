@@ -164,3 +164,63 @@ func TestDeleteUser(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateUser(t *testing.T) {
+	_ = lib.OpenDB()
+	user, _ := CreateUser(requests.CreateUserRequest{
+		FirstName: "Marijana",
+		LastName:  "Tanovic",
+		Nickname:  "Mara",
+		Password:  "ssss",
+		Email:     "mail@mail.com",
+		Country:   "Serbia",
+	})
+	type args struct {
+		userID string
+		req    *requests.UpdateUserRequest
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "userID invalid", args: args{
+			userID: "000",
+			req: &requests.UpdateUserRequest{
+				FirstName: "",
+				LastName:  "",
+				Nickname:  "",
+				Password:  "",
+				Email:     "",
+				Country:   "",
+			}}, wantErr: true},
+		{name: "userID not found", args: args{
+			userID: "000000008a90f2e849ek1754",
+			req: &requests.UpdateUserRequest{
+				FirstName: "",
+				LastName:  "",
+				Nickname:  "",
+				Password:  "",
+				Email:     "",
+				Country:   "",
+			}}, wantErr: true},
+		{name: "success", args: args{
+			userID: user.ID.Hex(),
+			req: &requests.UpdateUserRequest{
+				FirstName: user.FirstName,
+				LastName:  user.LastName,
+				Nickname:  "NewNickname",
+				Password:  user.Password,
+				Email:     user.Email,
+				Country:   user.Country,
+			}}, wantErr: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := UpdateUser(tt.args.userID, tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("UpdateUser() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
