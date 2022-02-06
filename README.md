@@ -17,3 +17,5 @@ When done:
 Tests:
 - make test
 
+Note:
+On `docker` branch is attempt of docker-compose 
