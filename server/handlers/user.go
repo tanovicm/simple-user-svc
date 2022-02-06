@@ -2,8 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -21,9 +20,13 @@ func UserCtx(handler http.Handler) http.Handler {
 
 		user, err := services.GetUser(userID)
 		if err != nil {
+			log.Printf("error retrieving user with userID: %v, err: %v\n", userID, err)
+			JSONError(w, "error retrieving user", http.StatusInternalServerError)
 			return
 		}
 		if user == nil {
+			log.Printf("user with userID: %v not found", userID)
+			JSONError(w, "user not found", http.StatusNotFound)
 			return
 		}
 
@@ -58,18 +61,20 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("limit") != "" && r.URL.Query().Get("offset") != "" {
 		offset, err = strconv.Atoi(r.URL.Query().Get("offset"))
 		if err != nil {
-			fmt.Println("error converting offset to int")
+			log.Println("error converting offset to int")
 			return
 		}
 		limit, err = strconv.Atoi(r.URL.Query().Get("limit"))
 		if err != nil {
-			fmt.Println("error converting limit to int")
+			log.Println("error converting limit to int")
 			return
 		}
 	}
 
 	users, err := services.ListUsers(filter)
 	if err != nil {
+		log.Printf("error retrieving users err: %v\n", err)
+		JSONError(w, "User listing failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -108,7 +113,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := services.CreateUser(request)
 	if err != nil {
-		JSONError(w, "Error creating user", http.StatusInternalServerError)
+		log.Printf("error creating user: err: %v\n", err)
+		JSONError(w, "User creation failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -128,6 +134,8 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = services.UpdateUser(user.ID.Hex(), &request)
 	if err != nil {
+		log.Printf("error updating user with id: %v: err: %v\n", user.ID.Hex(), err)
+		JSONError(w, "User update failed", http.StatusInternalServerError)
 		return
 	}
 	JSONOk(w, &struct{}{})
@@ -139,55 +147,10 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	err := services.DeleteUser(user.ID.Hex())
 	if err != nil {
+		log.Printf("error deleting user with id: %v: err: %v\n", user.ID.Hex(), err.Error())
+		JSONError(w, "User deletion failed", http.StatusInternalServerError)
 		return
 	}
 
 	JSONOk(w, &struct{}{})
-}
-
-func readJSON(r *http.Request, v interface{}) error {
-
-	err := json.NewDecoder(r.Body).Decode(v)
-	if err != nil {
-		return fmt.Errorf("invalid JSON input: %v", err)
-	}
-
-	return nil
-}
-
-type JSONErr struct {
-	Err string `json:"err"`
-}
-
-func JSONError(w http.ResponseWriter, errStr string, code int) {
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	writeJSON(w, &JSONErr{Err: errStr})
-}
-
-func writeJSON(w http.ResponseWriter, v interface{}) {
-
-	b, err := json.Marshal(v)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("json encoding error: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	writeBytes(w, b)
-}
-
-func writeBytes(w http.ResponseWriter, b []byte) {
-
-	_, err := w.Write(b)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("write error: %v", err), http.StatusInternalServerError)
-		return
-	}
-}
-
-func JSONOk(w http.ResponseWriter, v interface{}) {
-
-	w.Header().Set("Content-Type", "application/json")
-	writeJSON(w, v)
 }
