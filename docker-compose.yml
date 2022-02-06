@@ -5,17 +5,19 @@ services:
         build: .
         container_name: go_app
         depends_on:
-            - 'mongo'
+            - 'mongodb'
+        environment:
+            - PORT=8000
         ports:
-            - 8000:8000
+            - '8000:8000'
         volumes:
             - './go-app:/opt/go-app:cached'
     # MongoDB
-    mongo:
+    mongodb:
         image: 'mongo:4.2.6-bionic'
-        container_name: mongocontainer
+        container_name: mongo
         ports:
-            - 27017:27017
+            - '27100:27017'
         volumes:
             - ./mongodata:/data/db
         restart: always
