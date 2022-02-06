@@ -1,6 +1,7 @@
 package services
 
 import (
+	"reflect"
 	"testing"
 
 	"usersvc.io/api/v1/lib"
@@ -85,4 +86,81 @@ func compareStructs(got *models.User, want *models.User) bool {
 		return false
 	}
 	return true
+}
+
+func TestGetUser(t *testing.T) {
+	_ = lib.OpenDB()
+
+	type args struct {
+		userID string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *models.User
+		wantErr bool
+	}{
+		{name: "hex string is not a valid", args: args{"123"}, want: nil, wantErr: true},
+		{name: "non-exiting id", args: args{"000000000000000000000000"}, want: nil, wantErr: false},
+		{name: "success", args: args{"000000000000000000000000"}, want: nil, wantErr: false},
+	}
+	for i, tt := range tests {
+		var user *models.User
+		if i == len(tests) {
+			user, _ = CreateUser(requests.CreateUserRequest{
+				FirstName: "Marijana",
+				LastName:  "Tanovic",
+				Nickname:  "Mara",
+				Password:  "ssss",
+				Email:     "mail@mail.com",
+				Country:   "Serbia",
+			})
+			tests[len(tests)].args.userID = user.ID.Hex()
+			tests[len(tests)].want = user
+
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetUser(tt.args.userID)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetUser() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetUser() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDeleteUser(t *testing.T) {
+	_ = lib.OpenDB()
+	user, _ := CreateUser(requests.CreateUserRequest{
+		FirstName: "Marijana",
+		LastName:  "Tanovic",
+		Nickname:  "Mara",
+		Password:  "ssss",
+		Email:     "mail@mail.com",
+		Country:   "Serbia",
+	})
+	type args struct {
+		userID string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{name: "hex string is not a valid", args: args{"123"}, wantErr: true},
+		{name: "user-not found", args: args{"000000000000000000000000"}, wantErr: true},
+		{name: "success", args: args{user.ID.Hex()}, wantErr: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := DeleteUser(tt.args.userID); (err != nil) != tt.wantErr {
+				t.Log(tt.args.userID)
+				t.Errorf("DeleteUser() error = %v, wantErr %v, %v", err, tt.wantErr, tt.name)
+			}
+		})
+	}
 }
