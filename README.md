@@ -5,7 +5,9 @@ Requirements:
 
 Get mongo docker image:
 
-docker pull mongo:latest
+- `docker pull mongo:latest`
+- `docker run mongo`
+
 
 Run app: 
 - make build
