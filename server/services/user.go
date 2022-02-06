@@ -41,7 +41,7 @@ func GetUser(userID string) (*models.User, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("db err: ", err)
+		return nil, fmt.Errorf("db err: %v", err)
 	}
 
 	return &user, nil
