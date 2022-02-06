@@ -84,13 +84,17 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 		}
 		resp = append(resp, rsp)
 	}
-	if offset == 0 || limit == 0 {
+	if offset == 0 && limit == 0 {
 		JSONOk(w, resp)
 		return
 	}
 
-	JSONOk(w, resp[offset:offset+limit])
+	end := offset + limit
+	if end > len(resp) {
+		end = len(resp)
+	}
 
+	JSONOk(w, resp[offset:end])
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -105,9 +109,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := services.CreateUser(request)
 	if err != nil {
 		JSONError(w, "Error creating user", http.StatusInternalServerError)
+		return
 	}
-	JSONOk(w, &response.CreateUserResponse{ID: user.ID.Hex()})
 
+	JSONOk(w, &response.CreateUserResponse{ID: user.ID.Hex()})
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
