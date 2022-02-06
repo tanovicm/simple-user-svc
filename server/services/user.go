@@ -69,11 +69,16 @@ func DeleteUser(userID string) error {
 
 	return nil
 }
-func ListUsers() ([]*models.User, error) {
+func ListUsers(filters map[string]string) ([]*models.User, error) {
 
 	users := []*models.User{}
 
-	err := mgm.Coll(&models.User{}).SimpleFind(&users, &bson.M{}, &options.FindOptions{Sort: &bson.M{"created_at": -1}})
+	filter := bson.M{}
+	for k, v := range filters {
+		filter[k] = v
+	}
+
+	err := mgm.Coll(&models.User{}).SimpleFind(&users, &filter, &options.FindOptions{Sort: &bson.M{"created_at": -1}})
 	if err != nil {
 		return nil, fmt.Errorf("error listing users: %v", err)
 	}

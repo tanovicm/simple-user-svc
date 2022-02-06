@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"usersvc.io/api/v1/server/models"
@@ -47,7 +48,27 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func ListUsers(w http.ResponseWriter, r *http.Request) {
 
-	users, err := services.ListUsers()
+	filter := map[string]string{}
+	if r.URL.Query().Get("country") != "" {
+		filter["country"] = r.URL.Query().Get("country")
+	}
+
+	var offset, limit int
+	var err error
+	if r.URL.Query().Get("limit") != "" && r.URL.Query().Get("offset") != "" {
+		offset, err = strconv.Atoi(r.URL.Query().Get("offset"))
+		if err != nil {
+			fmt.Println("error converting offset to int")
+			return
+		}
+		limit, err = strconv.Atoi(r.URL.Query().Get("limit"))
+		if err != nil {
+			fmt.Println("error converting limit to int")
+			return
+		}
+	}
+
+	users, err := services.ListUsers(filter)
 	if err != nil {
 		return
 	}
@@ -63,8 +84,13 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 		}
 		resp = append(resp, rsp)
 	}
+	if offset == 0 || limit == 0 {
+		JSONOk(w, resp)
+		return
+	}
 
-	JSONOk(w, resp)
+	JSONOk(w, resp[offset:offset+limit])
+
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
