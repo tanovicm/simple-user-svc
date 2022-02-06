@@ -21,16 +21,15 @@ func BuildRouter() *chi.Mux {
 		w.Write([]byte("ok"))
 	})
 
-	// RESTy routes for "users" resource
 	r.Route("/users", func(r chi.Router) {
 		r.Get("/", handlers.ListUsers)
-		r.Post("/", handlers.CreateUser) // POST /users
+		r.Post("/", handlers.CreateUser)
 
 		r.Route("/{userID}", func(r chi.Router) {
-			r.Use(handlers.UserCtx)            // Load the *User on the request context
-			r.Get("/", handlers.GetUser)       // GET /users/123
-			r.Put("/", handlers.UpdateUser)    // PUT /users/123
-			r.Delete("/", handlers.DeleteUser) // DELETE /users/123
+			r.Use(handlers.UserCtx)
+			r.Get("/", handlers.GetUser)
+			r.Put("/", handlers.UpdateUser)
+			r.Delete("/", handlers.DeleteUser)
 		})
 
 	})
